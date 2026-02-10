@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ines, will you be my valentine?</title>
+<title>Valentine</title>
 
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
@@ -46,11 +46,29 @@ button{
   cursor:pointer;
 }
 
-#yes{ left:20%; background:#ff3b7a; color:white; }
-#no{ left:60%; background:#ddd; }
+#yes{
+  left:20%;
+  background:#ff3b7a;
+  color:white;
+  z-index:2;
+}
 
-.result{ display:none; margin-top:20px; }
-canvas{ position:fixed; inset:0; pointer-events:none; }
+#no{
+  left:60%;
+  background:#ddd;
+  z-index:1;
+}
+
+.result{
+  display:none;
+  margin-top:20px;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+}
 </style>
 </head>
 
@@ -67,73 +85,85 @@ canvas{ position:fixed; inset:0; pointer-events:none; }
   </div>
 
   <div class="result" id="result">
-    <h2>!YOU CLICKED YES!<h2>
-  <h2>YAY! 🎉❤️</h2>
+    <h1 style="color:#ff3b7a">!YOU CLICKED YES!</h1>
+    <h2>YAY! 🎉</h2>
 
-    <!-- TWÓJ GIF -->
     <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjN4YjQ2YXVjcXRleDFhdno1Y3czZjVzd2M2N29qcmZnMGJhYzJnYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Nvt8Y0E4IZdE4Ao3Q3/giphy.gif" width="260">
   </div>
 </div>
 
 <script>
-const zone=document.getElementById("zone");
-const yes=document.getElementById("yes");
-const no=document.getElementById("no");
-const result=document.getElementById("result");
+const zone = document.getElementById("zone");
+const yes = document.getElementById("yes");
+const no = document.getElementById("no");
+const result = document.getElementById("result");
 
-/* confetti */
-const conf=confetti.create(document.getElementById("c"),{resize:true});
+const conf = confetti.create(document.getElementById("c"), { resize:true });
 
-/* yes grow */
-let scale=1;
+let scale = 1;
 function grow(){
-  scale+=0.1;
-  yes.style.transform=`translateY(-50%) scale(${scale})`;
+  scale += 0.1;
+  yes.style.transform = `translateY(-50%) scale(${scale})`;
 }
 
-/* no run */
-function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+function clamp(n,min,max){
+  return Math.max(min, Math.min(max, n));
+}
 
 function move(x,y){
-  const z=zone.getBoundingClientRect();
-  const b=no.getBoundingClientRect();
+  const z = zone.getBoundingClientRect();
+  const b = no.getBoundingClientRect();
+  const yb = yes.getBoundingClientRect();
 
-  let dx=(b.left+b.width/2)-x;
-  let dy=(b.top+b.height/2)-y;
+  let dx = (b.left + b.width/2) - x;
+  let dy = (b.top + b.height/2) - y;
 
-  const m=Math.hypot(dx,dy)||1;
-  dx/=m; dy/=m;
+  const m = Math.hypot(dx,dy) || 1;
+  dx /= m;
+  dy /= m;
 
-  let l=(b.left-z.left)+dx*120;
-  let t=(b.top-z.top)+dy*120;
+  let l = (b.left - z.left) + dx * 140;
+  let t = (b.top - z.top) + dy * 140;
 
-  l=clamp(l,0,z.width-b.width);
-  t=clamp(t,0,z.height-b.height);
-Bc
-  no.style.left=l+"px";
-  no.style.top=t+"px";
+  l = clamp(l, 0, z.width - b.width);
+  t = clamp(t, 0, z.height - b.height);
+
+  // blokada nachodzenia na YES
+  const overlapX =
+    l + b.width > (yb.left - z.left) &&
+    l < (yb.right - z.left);
+
+  const overlapY =
+    t + b.height > (yb.top - z.top) &&
+    t < (yb.bottom - z.top);
+
+  if(overlapX && overlapY){
+    l = Math.random() * (z.width - b.width);
+    t = Math.random() * (z.height - b.height);
+  }
+
+  no.style.left = l + "px";
+  no.style.top = t + "px";
 
   grow();
 }
 
 function handle(e){
-  const p=e.touches?e.touches[0]:e;
-  move(p.clientX,p.clientY);
+  const p = e.touches ? e.touches[0] : e;
+  move(p.clientX, p.clientY);
 }
 
-/* mouse + phone */
-zone.addEventListener("pointermove",handle);
-zone.addEventListener("pointerdown",handle);
-zone.addEventListener("touchstart",handle);
-zone.addEventListener("touchmove",handle);
+zone.addEventListener("pointermove", handle);
+zone.addEventListener("pointerdown", handle);
+zone.addEventListener("touchstart", handle);
+zone.addEventListener("touchmove", handle);
 
-no.onclick=e=>e.preventDefault();
+no.onclick = e => e.preventDefault();
 
-/* yes click */
-yes.onclick=()=>{
-  zone.style.display="none";
-  result.style.display="block";
-  conf({particleCount:300,spread:120});
+yes.onclick = () => {
+  zone.style.display = "none";
+  result.style.display = "block";
+  conf({ particleCount:300, spread:120 });
 };
 </script>
 
